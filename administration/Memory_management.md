@@ -44,7 +44,7 @@
 |  --- |  --- | --- |
 | exec_mem_limit| 2147483648| 单个 instance 的内存限制。一个查询可以使用的内存为 instance 数量*exec_mem_limit。query_mem_limit 为 0 时，exec_mem_limit 才生效。 |
 | load_mem_limit| 0| 单个导入任务的内存限制。如果是 0，会取 exec_mem_limit。 |
-| query_mem_limit | 0 | 单个查询的内存限制。大于 0 时，使用 query_mem_limit 限制查询的内存；否则，使用 exec_mem_limit 限制查询的内存。 |
+| query_mem_limit | 0 | 单个查询的内存限制。大于 0 时，使用 query_mem_limit 限制查询的内存；否则，使用 exec_mem_limit 限制查询的内存。建议设置为 34359738368（32GB）以上。 |
 
 ## 查看内存使用
 
