@@ -40,6 +40,12 @@
 > 说明
 > 当资源组中运行的查询超过以上大查询限制时，查询将会终止，并返回错误。您也可以在 FE 节点 **fe.audit.log** 的 `ErrorCode` 列中查看错误信息。
 
+资源组的类型 `type` 支持实时资源组 `realtime` 与非实时资源组 `normal`。
+
+- 当实时资源组 `rg_group` 有查询正在运行时，当前 BE 节点会为其预留 `rg_group.cpu_core_limit` 的 CPU 资源。其他非实时资源组的 CPU 核数使用上限会被硬限制为 `当前 BE 节点核数-rg_group.cpu_core_limit`。
+- 当实时资源组 `rg_gruop` 没有查询正在运行时，其他非实时资源组的 CPU 核数没有硬限制。
+- 最多只能创建一个实时资源组。
+
 ### 分类器
 
 您可以为每个资源组关联一个或多个分类器。系统将会根据所有分类器中设置的条件，为每个查询任务选择一个匹配度最高的分类器，并根据生效的分类器所属的资源组为该查询任务分配资源。
@@ -116,7 +122,7 @@ WITH (
     "cpu_core_limit" = "INT",
     "mem_limit" = "m%",
     "concurrency_limit" = "INT",
-    "type" = "normal" --资源组的类型，固定取值为 normal。
+    "type" = "normal" --资源组的类型，固定取值为 normal 或 realtime。
 );
 ```
 
