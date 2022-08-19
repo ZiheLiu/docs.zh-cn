@@ -117,12 +117,12 @@ TO (
     role='string', 
     query_type in ('select'), 
     source_ip='cidr'
-) --创建分类器，多个分类器间用英文逗号（,）分隔。
+) -- 创建分类器，多个分类器间用英文逗号（,）分隔。
 WITH (
     "cpu_core_limit" = "INT",
     "mem_limit" = "m%",
     "concurrency_limit" = "INT",
-    "type" = "normal" --资源组的类型，固定取值为 normal 或 realtime。
+    "type" = "normal" -- 资源组的类型，取值为 normal 或 realtime。
 );
 ```
 
