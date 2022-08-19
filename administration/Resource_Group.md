@@ -42,8 +42,8 @@
 
 资源组的类型 `type` 支持实时资源组 `realtime` 与非实时资源组 `normal`。
 
-- 当实时资源组 `rg_group` 有查询正在运行时，当前 BE 节点会为其预留 `rg_group.cpu_core_limit` 的 CPU 资源，所有非实时资源组的总 CPU 核数使用上限会被硬限制为 BE 节点核数 - `rg_group.cpu_core_limit`。
-- 当实时资源组 `rg_gruop` 没有查询正在运行时，其他非实时资源组的 CPU 核数没有硬限制。
+- 当实时资源组 `rt_group` 有查询正在运行时，当前 BE 节点会为其预留 `rt_group.cpu_core_limit` 的 CPU 资源，所有非实时资源组的总 CPU 核数使用上限会被硬限制为 BE 节点核数 - `rt_group.cpu_core_limit`。
+- 当实时资源组 `rt_gruop` 没有查询正在运行时，其他非实时资源组的 CPU 核数没有硬限制。
 
 > 注意：您最多只能创建一个实时资源组。
 
