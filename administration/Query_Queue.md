@@ -47,7 +47,7 @@ SET GLOBAL query_queue_insert_enable = true;
 
 通过执行 `show backends` 可以获取每个 BE 正在运行的查询数量、内存使用率、CPU 使用率。
 
-```
+```plain text
 MySQL> show backends \G
 ***************************[ 1. row ]***************************
 ...
@@ -64,7 +64,7 @@ CpuUsedPct            | 6.2 %
 
 通过执行 `show prcesslist`，可以通过字段 `IsPending` 判断每个连接的查询是否处于排队状态。
 
-```
+```plain text
 MySQL> show prcesslist
 +------+--------+---------------------+---------+---------+---------------------+------+-------+------------------+-----------+
 | Id   |  User  | Host                | Db      | Command | ConnectionStartTime | Time | State | Info             | IsPending |
@@ -80,4 +80,3 @@ MySQL> show prcesslist
 - starrocks_fe_query_queue_pending 正在排队的查询数量。
 - starrocks_fe_query_queue_total 进行过排队的查询总数量。
 - starrocks_fe_query_queue_timeout 排队超时的查询总数量。
-
