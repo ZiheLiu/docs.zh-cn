@@ -33,11 +33,11 @@
   > 说明：query_pool 的查看方式，参见 [内存管理](Memory_management.md)。
 - `concurrency_limit`：资源组中并发查询数的上限，用以防止并发查询提交过多而导致的过载。只有大于 0 时才生效，默认值为 0。
 
-在以上资源限制的基础上，您可以通过以下大查询限制进一步对资源组进行如下的配置（只有大于 0 时才生效，默认值为 0）：
+在以上资源限制的基础上，您可以通过以下大查询限制进一步对资源组进行如下的配置：
 
-- `big_query_cpu_second_limit`：大查询任务可以使用 CPU 的时间上限，其中的并行任务将累加 CPU 使用时间。单位为秒。
-- `big_query_scan_rows_limit`：大查询任务可以扫描的行数上限。
-- `big_query_mem_limit`：大查询任务可以使用的内存上限。单位为 Byte。
+- `big_query_cpu_second_limit`：大查询任务可以使用 CPU 的时间上限，其中的并行任务将累加 CPU 使用时间。单位为秒。只有大于 0 时才生效，默认值为 0。
+- `big_query_scan_rows_limit`：大查询任务可以扫描的行数上限。只有大于 0 时才生效，默认值为 0。
+- `big_query_mem_limit`：大查询任务可以使用的内存上限。单位为 Byte。只有大于 0 时才生效，默认值为 0。
 
 > **说明**
 >
@@ -45,13 +45,15 @@
 
 资源组的类型 `type` 支持 `short_query`、`insert` 与 `normal`。
 
+- 默认为 `normal` 资源组，无需通过 `type` 参数指定。
 - 当 `insert` 资源组有导入任务正在运行时，当前 BE 节点会为其预留相应的计算资源。
-- 当 `short_query` 资源组有查询正在运行时，当前 BE 节点会为其预留 `short_query.cpu_core_limit` 的 CPU 资源，即所有 `normal` 资源组的总 CPU 核数使用上限会被硬限制为 BE 节点核数 - `short_query.cpu_core_limit`。注意，不会硬限制 `short_query` 资源组的 CPU 资源。
+- 当 `short_query` 资源组有查询正在运行时，当前 BE 节点会为其预留 `short_query.cpu_core_limit` 的 CPU 资源，即所有 `normal` 资源组的总 CPU 核数使用上限会被硬限制为 BE 节点核数 - `short_query.cpu_core_limit`。
 - 当 `short_query` 资源组没有查询正在运行时，所有 `normal` 资源组的 CPU 核数没有硬限制。
 
 > **注意**
 >
-> 您最多只能创建一个 `short_query` 资源组。
+> - 您最多只能创建一个 `short_query` 资源组。
+> - StarRocks 不会硬限制 `short_query` 资源组的 CPU 资源。
 
 ### 分类器
 
@@ -73,7 +75,7 @@
 >
 > 如果没有匹配到分类器，那么会使用默认资源组 `default_wg`，它的资源配置如下：
 >
-> - `cpu_core_limit`：1(<=2.3.7 版本) 或 BE 的 CPU 核数（>2.3.7版本）。
+> - `cpu_core_limit`：1 (<=2.3.7 版本) 或 BE 的 CPU 核数（>2.3.7版本）。
 > - `mem_limit`：100%。
 > - `concurrency_limit`：0。
 > - `big_query_cpu_second_limit`：0。
