@@ -4,8 +4,6 @@
 
 用于替换给定字符串中的字符。该函数会将给定字符串 `source` 中出现在 `from_string` 中的字符替换为对应位置的 `to_string` 中的字符。
 
-如果替换后结果字符串的长度超过了 VARCHAR 类型的最大长度（1048576），那么结果字符串将会是 `NULL`。
-
 ## 语法
 
 ```SQL
@@ -14,7 +12,7 @@ TRANSLATE(source, from_string, to_string)
 
 ## 参数说明
 
-- `str`: 要进行字符替换的字符串，支持的数据类型为 VARCHAR。对于不在 `from_string` 中的字符，直接在结果字符串中原样输出。
+- `source`: 要进行字符替换的字符串，支持的数据类型为 VARCHAR。对于不在 `from_string` 中的字符，直接在结果字符串中原样输出。
 
 - `from_string`: 支持的数据类型为 VARCHAR。如果一个字符在 `from_string` 中出现了多次，那么只有出现的第一次是有效的，见第六个示例。`from_string` 中的字符遵守如下规则：
   - 如果在 `to_string` 中有对应位置的字符，那么替换为该字符。
@@ -25,6 +23,12 @@ TRANSLATE(source, from_string, to_string)
 ## 返回值说明
 
 返回的数值类型为 VARCHAR。
+
+返回结果为 `NULL` 的场景：
+
+- 当任意一个输入参数为 `NULL` 时。
+
+- 当替换后结果字符串的长度超过了 VARCHAR 类型的最大长度（1048576）时。
 
 ## 示例
 
