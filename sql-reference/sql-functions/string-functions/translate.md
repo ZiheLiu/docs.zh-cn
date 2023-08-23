@@ -15,11 +15,9 @@ TRANSLATE( <source>, <from_string>, <to_string> )
 ## 参数说明
 
 - `str`: 支持的数据类型为 `VARCHAR`。要进行字符替换的字符串。对于不在 `from_string` 中的字符，直接在结果字符串中原样输出。
-
-- `from_string`: 支持的数据类型为 `VARCHAR`。每个 `from_string` 中的字符，
+- `from_string`: 支持的数据类型为 `VARCHAR`。如果一个字符在 `from_string` 中出现了多次，那么只有出现的第一次是有效的。对于 `from_string` 中的每个字符：
   - 如果在 `to_string` 中有对应位置的字符，那么替换为该字符。
   - 如果在 `to_string` 中没有对应位置的字符（`to_string` 的字符长度小于 `from_string`），那么在结果字符串删除这个字符。
-
 - `to_string`：支持的数据类型为 `VARCHAR`。用于替换 `from_string` 中对应位置的字符。如果 `to_string` 的字符长度大于 `from_string`，那么这部分多余的字符被忽略掉，不会有任何影响。
 
 ## 返回值说明
@@ -59,6 +57,13 @@ MySQL > select translate('abcabc', 'ab', '12') as test;
 +--------+
 
 MySQL > select translate('abcabc', 'ab', '123') as test;
++--------+
+| test   |
++--------+
+| 12c12c |
++--------+
+
+MySQL > select translate('abcabc', 'aba', '123') as test;
 +--------+
 | test   |
 +--------+
