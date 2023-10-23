@@ -117,9 +117,9 @@ SET GLOBAL enable_group_lelvel_query_queue = true;
 
 其中，`num_running_drivers` 表示正在运行的 `num_drivers`，`num_fragments` 表示当前查询的 fragment 数量。
 
-## 查看查询队列统计信息
+## 可观测性
 
-您可以通过以下方式查看查询队列的统计信息：
+您可以通过以下方式查看查询队列相关的可观测性信息。
 
 ### SHOW PROC
 
@@ -152,6 +152,8 @@ MySQL [(none)]> SHOW PROCESSLIST;
 查看 FE 审计日志文件 **fe.audit.log**。 其中 `PendingTimeMs` 字段表示查询在队列中等待的时间，单位为毫秒。
 
 ### FE Metrics
+
+下列 FE Metrics 是每个 FE 上各自统计该 FE 上的查询数量。
 
 | 指标                                            | 单位 | 类型   | 描述                                                         |
 | ----------------------------------------------- | ---- | ------ | ------------------------------------------------------------ |
