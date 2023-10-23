@@ -27,7 +27,8 @@
 
 您可以为资源组设置以下资源限制：
 
-- `cpu_core_limit`：该资源组在当前 BE 节点可使用的 CPU 核数软上限，实际使用的 CPU 核数会根据节点资源空闲程度按比例弹性伸缩。取值为正整数。
+- `cpu_core_limit`：该资源组在当前 BE 节点可使用的 CPU 核数软上限，实际使用的 CPU 核数会根据节点资源空闲程度按比例弹性伸缩。取值为正整数。取值范围为 (1, avg_be_cpu_cores]，其中 avg_be_cpu_cores 表示所有 BE 的 CPU 核数的平均值。
+  
   > 说明：例如，在 16 核的 BE 节点中设置三个资源组 rg1、rg2、rg3，`cpu_core_limit` 分别设置为 `2`、`6`、`8`。当在该 BE 节点满载时，资源组 rg1、rg2、rg3 能分配到的 CPU 核数分别为 BE 节点总 CPU 核数 ×（2/16）= 2、 BE 节点总 CPU 核数 ×（6/16）= 6、BE 节点总 CPU 核数 ×（8/16）= 8。如果当前 BE 节点资源非满载，rg1、rg2 有负载，rg3 无负载，则 rg1、rg2 分配到的 CPU 核数分别为 BE 节点总 CPU 核数 ×（2/8）= 4、 BE 节点总 CPU 核数 ×（6/8）= 12。
 - `mem_limit`：该资源组在当前 BE 节点可使用于查询的内存（query_pool）占总内存的百分比（%）。取值范围为 (0,1)。
   > 说明：query_pool 的查看方式，参见 [内存管理](Memory_management.md)。
@@ -65,6 +66,8 @@
 - `query_type`: 查询类型，目前支持 `SELECT` 与 `INSERT` (2.5及以后)。当 `query_type` 为 `insert` 的资源组有导入任务正在运行时，当前 BE 节点会为其预留相应的计算资源。
 - `source_ip`：发起查询的 IP 地址，类型为 CIDR。
 - `db`：查询所访问的 Database，可以为 `,` 分割的字符串。
+- `planCpuCostRange`：系统估计的查询 CPU 开销范围。格式为 `(double, double]`。默认为 NULL，表示没有该限制。
+- `planMemCostRange`：系统估计的查询内存开销范围。格式为 `(double, double]`。默认为 NULL，表示没有该限制。
 
 系统在为查询任务匹配分类器时，查询任务的信息与分类器的条件完全相同，才能视为匹配。如果存在多个分类器的条件与查询任务完全匹配，则需要计算不同分类器的匹配度。其中只有匹配度最高的分类器才会生效。
 
@@ -72,7 +75,9 @@
 >
 > 您可以在 FE 节点 **fe.audit.log** 的 `ResourceGroup` 列中查看特定查询任务最终所匹配的资源组。
 >
-> 如果没有匹配到分类器，那么会使用默认资源组 `default_wg`，它的资源配置如下：
+> 如果该查询不受资源组管理，那么该列值为空字符串 `""`。
+>
+> 如果该查询受资源组管理，但是没有匹配到分类器，那么该列值为空字符串 `""`，表示使用默认资源组 `default_wg`，它的资源配置如下：
 >
 > - `cpu_core_limit`：1 (&le;2.3.7 版本) 或 BE 的 CPU 核数（&gt;2.3.7版本）。
 > - `mem_limit`：100%。
@@ -80,6 +85,8 @@
 > - `big_query_cpu_second_limit`：0。
 > - `big_query_scan_rows_limit`：0。
 > - `big_query_mem_limit`：0。
+>
+> 您可以在 `explain verbose <SQL>` 的 `RESOURCE GROUP` 字段中查看特定查询任务最终所匹配的资源组。
 
 匹配度的计算方式如下：
 
@@ -122,6 +129,8 @@ classifier D (user='Alice', query_type in ('insert','select')）
 SET enable_pipeline_engine = true;
 -- 全局启用 Pipeline 引擎。
 SET GLOBAL enable_pipeline_engine = true;
+-- 对于导入任务，还需要开启 FE 配置 enable_pipeline_load 来启用 Pipeline 引擎。自 2.5.0 起，支持该参数。
+ADMIN SET FRONTEND CONFIG ("enable_pipeline_load_for_insert" = "false");
 ```
 
 > **说明**
