@@ -41,7 +41,7 @@ SET time_zone = "Asia/Shanghai";
 
  ```SQL
 SET GLOBAL query_mem_limit = 137438953472;
-```
+ ```
 
 以下变量仅支持全局生效，不支持设置为会话级别生效。您必须使用 `SET GLOBAL <var_name> = xxx;`，不能使用 `SET <var_name> = xxx;`，否则返回错误。
 
@@ -214,6 +214,12 @@ group-by-count-distinct 查询中为 count distinct 列设置的分桶数。该�
 ### enable_query_queue_statistic (global)
 
 布尔值，用于控制是否为统计信息查询启用查询队列。默认值：`false`。
+
+### enable_query_tablet_affinity
+
+布尔值，用于控制是否在多次查询同一个 tablet 时倾向于选择固定的同一个副本。默认值：`false`。
+
+开启该特性对于查询存在大量 tablet 的表的性能会有所帮助，因为会更快的将 tablet 的元信息以及数据缓存在内存中；但是，如果查询存在一些热点 tablet，开启该特性可能会导致性能有所退化，因为该特性倾向于将一个热点 tablet 调度到相同的 BE 上。
 
 ### enable_scan_block_cache（2.5 及以后）
 
