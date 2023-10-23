@@ -215,9 +215,9 @@ group-by-count-distinct 查询中为 count distinct 列设置的分桶数。该�
 
 布尔值，用于控制是否为统计信息查询启用查询队列。默认值：`false`。
 
-### enable_query_tablet_affinity
+### enable_query_tablet_affinity（2.5 及以后）
 
-布尔值，用于控制是否在多次查询同一个 tablet 时倾向于选择固定的同一个副本。默认值：`false`。
+布尔值，用于控制是否在多次查询同一个 tablet 时倾向于选择固定的同一个副本。默认值：`false`。自 2.5.6、3.0.8、3.1.5、3.2.0 版本其，StarRocks 支持该参数。
 
 开启该特性对于查询存在大量 tablet 的表的性能会有所帮助，因为会更快的将 tablet 的元信息以及数据缓存在内存中；但是，如果查询存在一些热点 tablet，开启该特性可能会导致性能有所退化，因为该特性倾向于将一个热点 tablet 调度到相同的 BE 上。
 
