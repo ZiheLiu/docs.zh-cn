@@ -73,7 +73,7 @@
 
 > **说明**
 >
-> 您可以在 FE 节点 **fe.audit.log** 的 `ResourceGroup` 列或 `explain verbose <query>` 的 `RESOURCE GROUP` 列中查看特定查询任务最终所匹配的资源组，详见[查看查询命中的资源组](#查看查询命中的资源组)
+> 您可以在 FE 节点 **fe.audit.log** 的 `ResourceGroup` 列或 `explain verbose <query>` 的 `RESOURCE GROUP` 列中查看特定查询任务最终所匹配的资源组，参见[查看查询命中的资源组](#查看查询命中的资源组)
 >
 
 匹配度的计算方式如下：
@@ -283,7 +283,7 @@ FE 节点 **fe.audit.log** 的 `ResourceGroup` 列和 `explain verbose <query>` 
 
 您可以为资源组设置[监控与报警](Monitor_and_Alert.md)。
 
-可监控的资源组相关的 FE 节点与 BE 节点的 Metrics 如下所示。
+可监控的资源组相关的 FE 节点与 BE 节点的 Metrics 如下所示。下面所有 Metrics 都带有 label `name`，表示其对应的资源组。
 
 #### FE 节点
 
@@ -292,9 +292,9 @@ FE 节点 **fe.audit.log** 的 `ResourceGroup` 列和 `explain verbose <query>` 
 | starrocks_fe_query_resource_group               | 个   | 瞬时值 | 该资源组历史运行过的查询数量（包括正在运行的查询）。         |
 | starrocks_fe_query_resource_group_latency       | 个   | 瞬时值 | 该资源组的查询延迟百分位数，label type 表示特定的分位数，包括 mean、75_quantile、95_quantile、98_quantile、99_quantile、999_quantile。 |
 | starrocks_fe_query_resource_group_err           | 个   | 瞬时值 | 该资源组报错的查询任务的数量。                               |
-| starrocks_fe_resource_group_query_queue_total   | 个   | 瞬时值 | 该资源组历史排队的查询数量（包括正在运行的查询）>=3.1.4。在开启查询队列时，该指标有意义，详见[查询队列](query_queues.md)。 |
-| starrocks_fe_resource_group_query_queue_pending | 个   | 瞬时值 | 该资源组正在排队的查询数量。>=3.1.4。在开启查询队列时，该指标有意义，详见[查询队列](query_queues.md)。 |
-| starrocks_fe_resource_group_query_queue_timeout | 个   | 瞬时值 | 该资源组排队超时的查询数量。>=3.1.4。在开启查询队列时，该指标有意义，详见[查询队列](query_queues.md)。 |
+| starrocks_fe_resource_group_query_queue_total   | 个   | 瞬时值 | 该资源组历史排队的查询数量（包括正在运行的查询）。从 3.1.4 版本起，StarRocks 支持该指标。在开启查询队列时，该指标有意义，参见[查询队列](query_queues.md)。 |
+| starrocks_fe_resource_group_query_queue_pending | 个   | 瞬时值 | 该资源组正在排队的查询数量。从 3.1.4 版本起，StarRocks 支持该指标。在开启查询队列时，该指标有意义，参见[查询队列](query_queues.md)。 |
+| starrocks_fe_resource_group_query_queue_timeout | 个   | 瞬时值 | 该资源组排队超时的查询数量。从 3.1.4 版本起，StarRocks 支持该指标。在开启查询队列时，该指标有意义，参见[查询队列](query_queues.md)。 |
 
 #### BE 节点
 
@@ -311,6 +311,41 @@ FE 节点 **fe.audit.log** 的 `ResourceGroup` 列和 `explain verbose <query>` 
 | resource_group_cpu_use_ratio              | 百分比 | 平均值 | [Deprecated]。该资源组使用的 pipeline 线程时间片占所有资源组 pipeline 线程时间片的比例。统计的是两次获取 metric 时间间隔的平均值。 |
 | resource_group_connector_scan_use_ratio   | 百分比 | 平均值 | [Deprecated]。该资源组使用的外表 scan 线程时间片占所有资源组 pipeline 线程时间片的比例。统计的是两次获取 metric 时间间隔的平均值。 |
 | resource_group_scan_use_ratio             | 百分比 | 平均值 | [Deprecated]。该资源组使用的内表 scan 线程时间片占所有资源组 pipeline 线程时间片的比例。统计的是两次获取 metric 时间间隔的平均值。 |
+
+### 查看资源组的使用信息
+
+从 3.1.4 版本开始，StarRocks 支持 `SHOW USAGE RESOURCE GROUPS`，会展示每个资源组在每个 BE 上的使用信息。各个字段的含义如下：
+
+- `Name`：资源组的名称。
+- `Id`：资源组的 ID。
+- `Backend`：BE 的 host。
+- `BEInUseCpuCores`：该资源组在该 BE 上正在使用的 CPU 核数，该值为一个估计近似值。
+- `BEInUseMemBytes`：该资源组在该 BE 上正在使用的内存字节数。
+- `BERunningQueries`：该资源组在该 BE 上还未结束的查询数量。
+
+注意：
+
+- 这些资源使用信息由 BE 周期性汇报给 Leader FE，汇报周期为 `report_resource_usage_interval_ms`，默认 1s。
+- 结果中只会展示 BEInUseCpuCores/BEInUseMemBytes/BERunningQueries 至少一个为正数的行，即只有一个资源组在一个 BE 上使用了某个资源时，才会在结果中进行展示。
+
+一个具体的示例如下所示：
+
+```
+SHOW USAGE RESOURCE GROUPS
++------------+----+-----------+-----------------+-----------------+------------------+
+| Name       | Id | Backend   | BEInUseCpuCores | BEInUseMemBytes | BERunningQueries |
++------------+----+-----------+-----------------+-----------------+------------------+
+| default_wg | 0  | 127.0.0.1 | 0.100           | 1               | 5                |
++------------+----+-----------+-----------------+-----------------+------------------+
+| default_wg | 0  | 127.0.0.2 | 0.200           | 2               | 6                |
++------------+----+-----------+-----------------+-----------------+------------------+
+| wg1        | 0  | 127.0.0.1 | 0.300           | 3               | 7                |
++------------+----+-----------+-----------------+-----------------+------------------+
+| wg2        | 0  | 127.0.0.1 | 0.400           | 4               | 8                |
++------------+----+-----------+-----------------+-----------------+------------------+
+```
+
+
 
 ## 下一步
 
