@@ -74,7 +74,7 @@ SET GLOBAL enable_group_lelvel_query_queue = true;
 | concurrency_limit | 0          | 该资源组在单个 BE 节点中并发查询上限。仅在设置为大于 `0` 后生效。 |
 | max_cpu_cores     | 0          | 该资源组在单个 BE 节点中使用的 CPU 核数上限。仅在设置为大于 `0` 后生效。取值范围：[0, avg_be_cpu_cores]，其中 avg_be_cpu_cores 表示所有 BE 的 CPU 核数的平均值。 |
 
-每个资源组在每个 BE 上的资源使用信息可以通过命令 `SHOW USAGE RESOURECE GROUPS` 来查看，参见[查看资源组的使用信息](resource_group#查看资源组的使用信息)。
+每个资源组在每个 BE 上的资源使用信息可以通过命令 `SHOW USAGE RESOURECE GROUPS` 来查看，参见[查看资源组的使用信息](resource_group.md#查看资源组的使用信息)。
 
 ### 管理并发查询数量
 
@@ -97,7 +97,7 @@ SET GLOBAL enable_group_lelvel_query_queue = true;
 
 从 v3.1.4 版本起，对于被查询队列管理的由 pipeline engine 运行的查询，StarRocks 可以根据当前正在运行的查询数量、fragment 数量 `num_fragments`、查询并发度 `pipeline_dop`，来动态调整新到来查询的并发度 `pipeline_dop`。通过这种方式，来减少查询的并发任务数量，在保证 BE 资源充分利用的基础上，降低调度的开销。
 
-> 对于 fragment 和查询并发度 `pipeline_dop` 参见[查询管理-调整查询并发度](Query_management#调整查询并发度)。
+> 对于 fragment 和查询并发度 `pipeline_dop` 参见[查询管理-调整查询并发度](Query_management.md#调整查询并发度)。
 
 动态调整查询 `pipeline_dop` 的策略由如下两个全局会话变量控制。
 
