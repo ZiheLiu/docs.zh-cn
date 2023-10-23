@@ -67,7 +67,7 @@ SET GLOBAL enable_group_lelvel_query_queue = true;
 
 ### 资源组粒度的资源阈值
 
-从 v3.1.4 开始，每个资源组可以设置各自的 `concurrency_limit` 和 `max_cpu_cores`。当发起一个查询时，如果任意一个资源超过了全局粒度或资源组粒度的的资源阈值，那么查询会进行排队，直到所有资源都没有超过阈值，再放行查询。
+从 v3.1.4 开始，每个资源组可以设置各自的 `concurrency_limit` 和 `max_cpu_cores`。当发起一个查询时，如果任意一个资源超过了全局粒度或资源组粒度的的资源阈值，那么查询会进行排队，直到所有资源都没有超过阈值，再放行该查询。
 
 | **变量**          | **默认值** | **描述**                                                     |
 | ----------------- | ---------- | ------------------------------------------------------------ |
@@ -95,16 +95,16 @@ SET GLOBAL enable_group_lelvel_query_queue = true;
 
 ## 根据并发查询数量动态调整查询并发度
 
-从 v3.1.4 版本起，对于被查询队列管理的由 pipeline engine 运行的查询，StarRocks 可以根据当前正在运行的查询数量、fragment 数量 `num_fragments`、查询并发度 `pipeline_dop`，来动态调整新到来查询的并发度 `pipeline_dop`。
+从 v3.1.4 版本起，对于被查询队列管理的由 pipeline engine 运行的查询，StarRocks 可以根据当前正在运行的查询数量、fragment 数量 `num_fragments`、查询并发度 `pipeline_dop`，来动态调整新到来查询的并发度 `pipeline_dop`。通过这种方式，来减少查询的并发任务数量，在保证 BE 资源充分利用的基础上，降低调度的开销。
 
->  对于 fragment 和查询并发度 `pipeline_dop`参见[查询管理-调整查询并发度](Query_management#调整查询并发度)。
+>  对于 fragment 和查询并发度 `pipeline_dop `参见[查询管理-调整查询并发度](Query_management#调整查询并发度)。
 
 动态调整查询 `pipeline_dop` 的策略由如下两个全局会话变量控制。
 
 | **变量**                      | **默认值** | **描述**                                                     |
 | ----------------------------- | ---------- | ------------------------------------------------------------ |
-| query_queue_driver_high_water | -1         | 非负数有效。等于 0 时，会设置为 `avg_be_cpu_cores*16`，其中 `avg_be_cpu_cores` 表示所有 BE 的 CPU 核数的平均值。 |
-| query_queue_driver_low_water  | -1         | 非负数有效。等于 0 时，会设置为 `avg_be_cpu_cores*8`。       |
+| query_queue_driver_high_water | -1         | 非负数有效。等于 0 时，会设置为 `avg_be_cpu_cores*16`，其中 `avg_be_cpu_cores` 表示所有 BE 的 CPU 核数的平均值。大于 0 时，会直接使用该值。 |
+| query_queue_driver_low_water  | -1         | 非负数有效。等于 0 时，会设置为 `avg_be_cpu_cores*8`。大于 0 时，会直接使用该值。 |
 
 对于被查询队列管理的查询，StarRocks 会维护一个逻辑 driver 数量 `num_drivers=num_fragments*pipeline_dop`，来表示一个查询的所有 fragment 在一个 BE 上总的并发数量。当新到来一个查询时，会调整其 `pipeline_dop`：
 
@@ -114,6 +114,8 @@ SET GLOBAL enable_group_lelvel_query_queue = true;
 具体的计算公式如下所示：
 
 ![query_queues_fig1](../assets/query_queues_fig1.png)
+
+其中，`num_running_drivers` 表示正在运行的 `num_drivers`，`num_fragments` 表示当前查询的 fragment 数量。
 
 ## 查看查询队列统计信息
 
