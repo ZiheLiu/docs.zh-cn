@@ -328,8 +328,8 @@ FE 节点 **fe.audit.log** 的 `ResourceGroup` 列和 `explain verbose <query>` 
 
 一个具体的示例如下所示：
 
-```
-SHOW USAGE RESOURCE GROUPS
+```Plain
+MySQL [(none)]> SHOW USAGE RESOURCE GROUPS;
 +------------+----+-----------+-----------------+-----------------+------------------+
 | Name       | Id | Backend   | BEInUseCpuCores | BEInUseMemBytes | BERunningQueries |
 +------------+----+-----------+-----------------+-----------------+------------------+

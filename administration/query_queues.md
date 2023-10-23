@@ -97,7 +97,7 @@ SET GLOBAL enable_group_lelvel_query_queue = true;
 
 从 v3.1.4 版本起，对于被查询队列管理的由 pipeline engine 运行的查询，StarRocks 可以根据当前正在运行的查询数量、fragment 数量 `num_fragments`、查询并发度 `pipeline_dop`，来动态调整新到来查询的并发度 `pipeline_dop`。通过这种方式，来减少查询的并发任务数量，在保证 BE 资源充分利用的基础上，降低调度的开销。
 
->  对于 fragment 和查询并发度 `pipeline_dop `参见[查询管理-调整查询并发度](Query_management#调整查询并发度)。
+> 对于 fragment 和查询并发度 `pipeline_dop` 参见[查询管理-调整查询并发度](Query_management#调整查询并发度)。
 
 动态调整查询 `pipeline_dop` 的策略由如下两个全局会话变量控制。
 
@@ -153,7 +153,6 @@ MySQL [(none)]> SHOW PROCESSLIST;
 
 ### FE Metrics
 
-
 | 指标                                            | 单位 | 类型   | 描述                                                         |
 | ----------------------------------------------- | ---- | ------ | ------------------------------------------------------------ |
 | starrocks_fe_query_queue_pending                | 个   | 瞬时值 | 当前正在队列中的查询数量。                                   |
@@ -179,7 +178,8 @@ MySQL [(none)]> SHOW PROCESSLIST;
 
 一个具体的示例如下所示：
 
-```
+```Plain
+MySQL [(none)]> SHOW RUNNING QUERIES;
 +--------------------------------------+-----------------+---------------------+---------------------+---------------------+-----------+-------+---------------------------------+---------------------+
 | QueryId                              | ResourceGroupId | StartTime           | PendingTimeout      | QueryTimeout        |   State   | Slots | Frontend                        | FeStartTime         |
 +--------------------------------------+-----------------+---------------------+---------------------+---------------------+-----------+-------+---------------------------------+---------------------+
