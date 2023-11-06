@@ -27,7 +27,7 @@
 
 您可以为资源组设置以下资源限制：
 
-- `cpu_core_limit`：该资源组在当前 BE 节点可使用的 CPU 核数软上限，实际使用的 CPU 核数会根据节点资源空闲程度按比例弹性伸缩。取值为正整数。取值范围为 (1, avg_be_cpu_cores]，其中 avg_be_cpu_cores 表示所有 BE 的 CPU 核数的平均值。
+- `cpu_core_limit`：该资源组在当前 BE 节点可使用的 CPU 核数软上限，实际使用的 CPU 核数会根据节点资源空闲程度按比例弹性伸缩。取值为正整数。取值范围为 (1, `avg_be_cpu_cores`]，其中 `avg_be_cpu_cores` 表示所有 BE 的 CPU 核数的平均值。
   
   > 说明：例如，在 16 核的 BE 节点中设置三个资源组 rg1、rg2、rg3，`cpu_core_limit` 分别设置为 `2`、`6`、`8`。当在该 BE 节点满载时，资源组 rg1、rg2、rg3 能分配到的 CPU 核数分别为 BE 节点总 CPU 核数 ×（2/16）= 2、 BE 节点总 CPU 核数 ×（6/16）= 6、BE 节点总 CPU 核数 ×（8/16）= 8。如果当前 BE 节点资源非满载，rg1、rg2 有负载，rg3 无负载，则 rg1、rg2 分配到的 CPU 核数分别为 BE 节点总 CPU 核数 ×（2/8）= 4、 BE 节点总 CPU 核数 ×（6/8）= 12。
 - `mem_limit`：该资源组在当前 BE 节点可使用于查询的内存（query_pool）占总内存的百分比（%）。取值范围为 (0,1)。
@@ -63,18 +63,17 @@
 
 - `user`：用户名。
 - `role`：用户所属的 Role。
-- `query_type`: 查询类型，目前支持 `SELECT` 与 `INSERT` (2.5及以后)。当 `query_type` 为 `insert` 的资源组有导入任务正在运行时，当前 BE 节点会为其预留相应的计算资源。
+- `query_type`: 查询类型，目前支持 `SELECT` 与 `INSERT` (2.5及以后)。当 `query_type` 为 `insert` 的资源组有 INSERT INTO 或 Broker Load 导入任务正在运行时，当前 BE 节点会为其预留相应的计算资源。
 - `source_ip`：发起查询的 IP 地址，类型为 CIDR。
 - `db`：查询所访问的 Database，可以为 `,` 分割的字符串。
-- `planCpuCostRange`：系统估计的查询 CPU 开销范围。格式为 `(double, double]`。默认为 NULL，表示没有该限制。fe.audit.log 的 `PlanCpuCost` 列为系统估计的一个查询的 CPU 开销。自 3.1.4 版本起，StarRocks 支持该参数。
-- `planMemCostRange`：系统估计的查询内存开销范围。格式为 `(double, double]`。默认为 NULL，表示没有该限制。fe.audit.log 的 `PlanMemCost` 列为系统估计的一个查询的内存开销。自 3.1.4 版本起，StarRocks 支持该参数。
+- `plan_cpu_cost_range`：系统估计的查询 CPU 开销范围。格式为 `(DOUBLE, DOUBLE]`。默认为 NULL，表示没有该限制。fe.audit.log 的 `PlanCpuCost` 列为系统估计的该查询的 CPU 开销。自 v3.1.4 版本起，StarRocks 支持该参数。
+- `plan_mem_cost_range`：系统估计的查询内存开销范围。格式为 `(DOUBLE, DOUBLE]`。默认为 NULL，表示没有该限制。fe.audit.log 的 `PlanMemCost` 列为系统估计的该查询的内存开销。自 v3.1.4 版本起，StarRocks 支持该参数。
 
 系统在为查询任务匹配分类器时，查询任务的信息与分类器的条件完全相同，才能视为匹配。如果存在多个分类器的条件与查询任务完全匹配，则需要计算不同分类器的匹配度。其中只有匹配度最高的分类器才会生效。
 
 > **说明**
 >
-> 您可以在 FE 节点 **fe.audit.log** 的 `ResourceGroup` 列或 `explain verbose <query>` 的 `RESOURCE GROUP` 列中查看特定查询任务最终所匹配的资源组，参见[查看查询命中的资源组](#查看查询命中的资源组)
->
+> 您可以在 FE 节点 **fe.audit.log** 的 `ResourceGroup` 列或 `EXPLAIN VERBOSE <query>` 的 `RESOURCE GROUP` 列中查看特定查询任务最终所匹配的资源组，参见[查看查询命中的资源组](#查看查询命中的资源组)。
 
 匹配度的计算方式如下：
 
@@ -83,12 +82,12 @@
 - 如果 `query_type` 一致，则该分类器匹配度增加 1 + 1/分类器的 `query_type` 数量。
 - 如果 `source_ip` 一致，则该分类器匹配度增加 1 + (32 - cidr_prefix)/64。
 - 如果查询的 `db` 匹配，则匹配度加 10。
-- 如果查询的 CPU 开销在 `planCpuCostRange` 范围内，则匹配度增加 1。
-- 如果查询的内存开销在 `planMemCostRange` 范围内，则匹配度增加 1。
+- 如果查询的 CPU 开销在 `plan_cpu_cost_range` 范围内，则该分类器匹配度增加 1。
+- 如果查询的内存开销在 `plan_mem_cost_range` 范围内，则该分类器匹配度增加 1。
 
 例如，多个与查询任务匹配的分类器中，分类器的条件数量越多，则其匹配度越高。
 
-```sql
+```Plain
 -- 因为分类器 B 的条件数量比 A 多，所以 B 的匹配度比 A 高。
 classifier A (user='Alice')
 classifier B (user='Alice', source_ip = '192.168.1.0/24')
@@ -96,7 +95,7 @@ classifier B (user='Alice', source_ip = '192.168.1.0/24')
 
 如果分类器的条件数量相等，则分类器的条件描述越精确，其匹配度越高。
 
-```sql
+```Plain
 -- 因为分类器 B 限定的 `source_ip` 地址范围更小，所以 B 的匹配度比 A 高。
 classifier A (user='Alice', source_ip = '192.168.1.0/16')
 classifier B (user='Alice', source_ip = '192.168.1.0/24')
@@ -108,7 +107,7 @@ classifier D (user='Alice', query_type in ('insert','select')）
 
 如果多个分类器的匹配度相同，那么会随机选择其中一个分类器。
 
-```sql
+```Plain
 -- 如果一个查询同时查询了 db1 和 db2，并且命中的分类器中 E 和 F 的匹配度最高，那么会从 E 和 F 中随机选择一个。
 classifier E (db='db1')
 classifier F (db='db2')
@@ -127,7 +126,11 @@ classifier F (db='db2')
 SET enable_pipeline_engine = true;
 -- 全局启用 Pipeline 引擎。
 SET GLOBAL enable_pipeline_engine = true;
--- 对于导入任务，还需要开启 FE 配置 enable_pipeline_load 来启用 Pipeline 引擎。自 2.5.0 起，支持该参数。
+```
+
+对于导入任务，还需要开启 FE 配置项 `enable_pipeline_load` 来为导入任务启用 Pipeline 引擎。该参数自 v2.5.0 起支持。
+
+```sql
 ADMIN SET FRONTEND CONFIG ("enable_pipeline_load_for_insert" = "false");
 ```
 
@@ -258,15 +261,15 @@ ALTER RESOURCE GROUP <group_name> DROP (CLASSIFIER_ID_1, CLASSIFIER_ID_2, ...);
 ALTER RESOURCE GROUP <group_name> DROP ALL;
 ```
 
-## 可观测性
+## 观测资源组
 
 ### 查看查询命中的资源组
 
-FE 节点 **fe.audit.log** 的 `ResourceGroup` 列和 `explain verbose <query>` 的 `RESOURCE GROUP` 列表示特定查询任务最终所匹配的资源组。
+FE 节点 **fe.audit.log** 的 `ResourceGroup` 列和 `EXPLAIN VERBOSE <query>` 的 `RESOURCE GROUP` 列表示特定查询任务最终所匹配的资源组。
 
 - 如果该查询不受资源组管理，那么该列值为空字符串 `""`。
 
-- 如果该查询受资源组管理，但是没有匹配到分类器，那么该列值为空字符串 `""`，表示使用默认资源组 `default_wg`，它的资源配置如下：
+- 如果该查询受资源组管理，但是没有匹配到分类器，那么该列值为空字符串 `""`，表示使用默认资源组 `default_wg`。
 
 默认资源组 `default_wg` 的资源配置如下：
 
@@ -281,44 +284,44 @@ FE 节点 **fe.audit.log** 的 `ResourceGroup` 列和 `explain verbose <query>` 
 
 您可以为资源组设置[监控与报警](Monitor_and_Alert.md)。
 
-可监控的资源组相关的 FE 节点与 BE 节点的 Metrics 如下所示。下面所有 Metrics 都带有 label `name`，表示其对应的资源组。
+可监控的资源组相关的 FE 与 BE 指标 如下所示。下面所有指标都带有 label `name`，表示其对应的资源组。
 
-#### FE 节点
+#### FE 指标
 
 下列 FE Metrics 是每个 FE 上各自统计该 FE 上的查询数量。
 
 | 指标                                            | 单位 | 类型   | 描述                                                         |
 | ----------------------------------------------- | ---- | ------ | ------------------------------------------------------------ |
 | starrocks_fe_query_resource_group               | 个   | 瞬时值 | 该资源组历史运行过的查询数量（包括正在运行的查询）。         |
-| starrocks_fe_query_resource_group_latency       | 个   | 瞬时值 | 该资源组的查询延迟百分位数，label type 表示特定的分位数，包括 mean、75_quantile、95_quantile、98_quantile、99_quantile、999_quantile。 |
+| starrocks_fe_query_resource_group_latency       | N/A  | 瞬时值 | 该资源组的查询延迟百分位数，label type 表示特定的分位数，包括 `mean`、`75_quantile`、`95_quantile`、`98_quantile`、`99_quantile`、`999_quantile`。 |
 | starrocks_fe_query_resource_group_err           | 个   | 瞬时值 | 该资源组报错的查询任务的数量。                               |
-| starrocks_fe_resource_group_query_queue_total   | 个   | 瞬时值 | 该资源组历史排队的查询数量（包括正在运行的查询）。从 3.1.4 版本起，StarRocks 支持该指标。在开启查询队列时，该指标有意义，参见[查询队列](query_queues.md)。 |
-| starrocks_fe_resource_group_query_queue_pending | 个   | 瞬时值 | 该资源组正在排队的查询数量。从 3.1.4 版本起，StarRocks 支持该指标。在开启查询队列时，该指标有意义，参见[查询队列](query_queues.md)。 |
-| starrocks_fe_resource_group_query_queue_timeout | 个   | 瞬时值 | 该资源组排队超时的查询数量。从 3.1.4 版本起，StarRocks 支持该指标。在开启查询队列时，该指标有意义，参见[查询队列](query_queues.md)。 |
+| starrocks_fe_resource_group_query_queue_total   | 个   | 瞬时值 | 该资源组历史排队的查询数量（包括正在运行的查询）。该指标自 v3.1.4 起支持。仅在开启查询队列时，该指标有意义，参见[查询队列](query_queues.md)。 |
+| starrocks_fe_resource_group_query_queue_pending | 个   | 瞬时值 | 该资源组正在排队的查询数量。该指标自 v3.1.4 起支持。仅在开启查询队列时，该指标有意义，参见[查询队列](query_queues.md)。 |
+| starrocks_fe_resource_group_query_queue_timeout | 个   | 瞬时值 | 该资源组排队超时的查询数量。该指标自 v3.1.4 起支持。仅在开启查询队列时，该指标有意义，参见[查询队列](query_queues.md)。 |
 
-#### BE 节点
+#### BE 指标
 
 | 指标                                      | 单位   | 类型   | 描述                                                         |
 | ----------------------------------------- | ------ | ------ | ------------------------------------------------------------ |
 | resource_group_running_queries            | 个     | 瞬时值 | 该资源组当前正在运行的查询数量。                             |
 | resource_group_total_queries              | 个     | 瞬时值 | 该资源组历史运行过的查询数量（包括正在运行的查询）。         |
 | resource_group_bigquery_count             | 个     | 瞬时值 | 该资源组触发大查询限制的查询数量。                           |
-| resource_group_concurrency_overflow_count | 个     | 瞬时值 | 该资源组触发 concurrency_limit 限制的查询数量。              |
+| resource_group_concurrency_overflow_count | 个     | 瞬时值 | 该资源组触发 `concurrency_limit` 限制的查询数量。              |
 | resource_group_mem_limit_bytes            | Bytes  | 瞬时值 | 该资源组的内存上限。                                         |
 | resource_group_mem_inuse_bytes            | Bytes  | 瞬时值 | 该资源组正在使用的内存。                                     |
-| resource_group_cpu_limit_ratio            | 百分比 | 瞬时值 | 该资源组的 cpu_core_limit 占所有资源组 cpu_core_limit 的比例。 |
-| resource_group_inuse_cpu_cores            | 个     | 平均值 | 该资源组正在使用的 CPU 核数，该值为一个估计值。统计的是两次获取 metric 时间间隔的平均值。从 3.1.4 版本起，StarRocks 支持该指标。 |
-| resource_group_cpu_use_ratio              | 百分比 | 平均值 | [Deprecated]。该资源组使用的 pipeline 线程时间片占所有资源组 pipeline 线程时间片的比例。统计的是两次获取 metric 时间间隔的平均值。 |
-| resource_group_connector_scan_use_ratio   | 百分比 | 平均值 | [Deprecated]。该资源组使用的外表 scan 线程时间片占所有资源组 pipeline 线程时间片的比例。统计的是两次获取 metric 时间间隔的平均值。 |
-| resource_group_scan_use_ratio             | 百分比 | 平均值 | [Deprecated]。该资源组使用的内表 scan 线程时间片占所有资源组 pipeline 线程时间片的比例。统计的是两次获取 metric 时间间隔的平均值。 |
+| resource_group_cpu_limit_ratio            | 百分比 | 瞬时值 | 该资源组的 `cpu_core_limit` 占所有资源组 `cpu_core_limit` 的比例。 |
+| resource_group_inuse_cpu_cores            | 个     | 平均值 | 该资源组正在使用的 CPU 核数，该值为一个估计值。统计的是两次获取 Metric 时间间隔的平均值。该指标自 v3.1.4 起支持。 |
+| resource_group_cpu_use_ratio              | 百分比 | 平均值 | **Deprecated** 该资源组使用的 Pipeline 线程时间片占所有资源组 Pipeline 线程时间片的比例。统计的是两次获取指标时间间隔的平均值。 |
+| resource_group_connector_scan_use_ratio   | 百分比 | 平均值 | **Deprecated** 该资源组使用的外表 Scan 线程时间片占所有资源组 Pipeline 线程时间片的比例。统计的是两次获取指标时间间隔的平均值。 |
+| resource_group_scan_use_ratio             | 百分比 | 平均值 | **Deprecated** 该资源组使用的内表 Scan 线程时间片占所有资源组 Pipeline 线程时间片的比例。统计的是两次获取指标时间间隔的平均值。 |
 
 ### 查看资源组的使用信息
 
-从 3.1.4 版本开始，StarRocks 支持 `SHOW USAGE RESOURCE GROUPS`，会展示每个资源组在每个 BE 上的使用信息。各个字段的含义如下：
+从 v3.1.4 版本开始，StarRocks 支持 SQL 语句 SHOW USAGE RESOURCE GROUPS，用以展示每个资源组在各个 BE 上的使用信息。各个字段的含义如下：
 
 - `Name`：资源组的名称。
 - `Id`：资源组的 ID。
-- `Backend`：BE 的 host。
+- `Backend`：BE 的 IP 或 FQDN。
 - `BEInUseCpuCores`：该资源组在该 BE 上正在使用的 CPU 核数，该值为一个估计近似值。
 - `BEInUseMemBytes`：该资源组在该 BE 上正在使用的内存字节数。
 - `BERunningQueries`：该资源组在该 BE 上还未结束的查询数量。
@@ -326,9 +329,9 @@ FE 节点 **fe.audit.log** 的 `ResourceGroup` 列和 `explain verbose <query>` 
 注意：
 
 - 这些资源使用信息由 BE 周期性汇报给 Leader FE，汇报周期为 `report_resource_usage_interval_ms`，默认 1s。
-- 结果中只会展示 BEInUseCpuCores/BEInUseMemBytes/BERunningQueries 至少一个为正数的行，即只有一个资源组在一个 BE 上使用了某个资源时，才会在结果中进行展示。
+- 结果中只会展示 BEInUseCpuCores/BEInUseMemBytes/BERunningQueries 至少一个为正数的行，即只有一个资源组在一个 BE 上使用了某种资源时，才会在结果中进行展示。
 
-一个具体的示例如下所示：
+示例：
 
 ```Plain
 MySQL [(none)]> SHOW USAGE RESOURCE GROUPS;
