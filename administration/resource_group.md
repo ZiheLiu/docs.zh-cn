@@ -293,7 +293,7 @@ FE 节点 **fe.audit.log** 的 `ResourceGroup` 列和 `EXPLAIN VERBOSE <query>` 
 | 指标                                            | 单位 | 类型   | 描述                                                         |
 | ----------------------------------------------- | ---- | ------ | ------------------------------------------------------------ |
 | starrocks_fe_query_resource_group               | 个   | 瞬时值 | 该资源组历史运行过的查询数量（包括正在运行的查询）。         |
-| starrocks_fe_query_resource_group_latency       | 百分比  | 瞬时值 | 该资源组的查询延迟百分位数，label type 表示特定的分位数，包括 `mean`、`75_quantile`、`95_quantile`、`98_quantile`、`99_quantile`、`999_quantile`。 |
+| starrocks_fe_query_resource_group_latency       | ms   | 瞬时值 | 该资源组的查询延迟百分位数，label type 表示特定的分位数，包括 `mean`、`75_quantile`、`95_quantile`、`98_quantile`、`99_quantile`、`999_quantile`。 |
 | starrocks_fe_query_resource_group_err           | 个   | 瞬时值 | 该资源组报错的查询任务的数量。                               |
 | starrocks_fe_resource_group_query_queue_total   | 个   | 瞬时值 | 该资源组历史排队的查询数量（包括正在运行的查询）。该指标自 v3.1.4 起支持。仅在开启查询队列时，该指标有意义，参见[查询队列](query_queues.md)。 |
 | starrocks_fe_resource_group_query_queue_pending | 个   | 瞬时值 | 该资源组正在排队的查询数量。该指标自 v3.1.4 起支持。仅在开启查询队列时，该指标有意义，参见[查询队列](query_queues.md)。 |
