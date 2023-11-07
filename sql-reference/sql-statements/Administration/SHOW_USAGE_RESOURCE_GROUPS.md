@@ -19,6 +19,11 @@ SHOW USAGE RESOURCE GROUPS
 - `BEInUseMemBytes`：该资源组在该 BE 上正在使用的内存字节数。
 - `BERunningQueries`：该资源组在该 BE 上还未结束的查询数量。
 
+## 使用说明
+
+- 这些资源使用信息由 BE 周期性汇报给 Leader FE，汇报周期为 `report_resource_usage_interval_ms`，默认 1s。
+- 结果中只会展示 BEInUseCpuCores/BEInUseMemBytes/BERunningQueries 至少一个为正数的行，即只有一个资源组在一个 BE 上使用了某种资源时，才会在结果中进行展示。
+
 ## 示例
 
 ```Plain
