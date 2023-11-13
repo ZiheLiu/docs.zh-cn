@@ -183,7 +183,7 @@ group-by-count-distinct 查询中为 count distinct 列设置的分桶数。该�
 
 ### enable_group_level_query_queue （3.1.4 及以后）
 
-是否开启资源组粒度的查询队列。
+是否开启资源组粒度的[查询队列](../administration/query_queues.md)。
 
 默认值：false，表示不开启。
 
