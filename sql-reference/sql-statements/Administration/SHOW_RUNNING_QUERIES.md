@@ -15,7 +15,7 @@ SHOW RUNNING QUERIES
 - `QuerId`：该查询的 Query ID。
 - `ResourceGroupId`：该查询命中的资源组 ID。当没有命中用户定义的资源组时，会显示为 “-”。
 - `StartTime`：该查询开始时间。
-- `PendingTimeout`：该查询未来排队超时的时间。
+- `PendingTimeout`：PENDING 状态下查询在队列中超时的时间。
 - `QueryTimeout`：该查询超时的时间。
 - `State`：该查询的排队状态。其中，PENDING 表示在队列中；RUNNING 表示正在执行。
 - `Slots`：该查询申请的逻辑资源数量，目前固定为 `1`。
