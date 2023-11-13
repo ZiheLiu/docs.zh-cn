@@ -69,7 +69,6 @@
 - [SHOW FRONTENDS](./Administration/SHOW_FRONTENDS.md)
 - [SHOW PROC](./Administration/SHOW_PROC.md)
 - [SHOW PROCESSLIST](./Administration/SHOW_PROCESSLIST.md)
-- [SHOW USAGE RESOURCE GROUPS](./Administration/SHOW_USAGE_RESOURCE_GROUPS.md)
 - [SHOW RUNNING QUERIES](./Administration/SHOW_RUNNING_QUERIES.md)
 
 ### 资源组
@@ -78,6 +77,7 @@
 - [ALTER RESOURCE GROUP](./Administration/ALTER_RESOURCE_GROUP.md)
 - [DROP RESOURCE GROUP](./Administration/DROP_RESOURCE_GROUP.md)
 - [SHOW RESOURCE GROUP](./Administration/SHOW_RESOURCE_GROUP.md)
+- [SHOW USAGE RESOURCE GROUPS](./Administration/SHOW_USAGE_RESOURCE_GROUPS.md)
 
 ### 存储卷
 
