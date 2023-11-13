@@ -311,14 +311,14 @@ FE 节点 **fe.audit.log** 的 `ResourceGroup` 列和 `EXPLAIN VERBOSE <query>` 
 | resource_group_mem_limit_bytes            | Bytes  | 瞬时值 | 该资源组的内存上限。                                         |
 | resource_group_mem_inuse_bytes            | Bytes  | 瞬时值 | 该资源组正在使用的内存。                                     |
 | resource_group_cpu_limit_ratio            | 百分比 | 瞬时值 | 该资源组的 `cpu_core_limit` 占所有资源组 `cpu_core_limit` 的比例。 |
-| resource_group_inuse_cpu_cores            | 个     | 平均值 | 该资源组正在使用的 CPU 核数，该值为一个估计值。统计的是两次获取 Metric 时间间隔的平均值。该指标自 v3.1.4 起支持。 |
-| resource_group_cpu_use_ratio              | 百分比 | 平均值 | **Deprecated** 该资源组使用的 Pipeline 线程时间片占所有资源组 Pipeline 线程时间片的比例。统计的是两次获取指标时间间隔的平均值。 |
-| resource_group_connector_scan_use_ratio   | 百分比 | 平均值 | **Deprecated** 该资源组使用的外表 Scan 线程时间片占所有资源组 Pipeline 线程时间片的比例。统计的是两次获取指标时间间隔的平均值。 |
-| resource_group_scan_use_ratio             | 百分比 | 平均值 | **Deprecated** 该资源组使用的内表 Scan 线程时间片占所有资源组 Pipeline 线程时间片的比例。统计的是两次获取指标时间间隔的平均值。 |
+| resource_group_inuse_cpu_cores            | 个     | 平均值 | 该资源组正在使用的 CPU 核数，该值为一个估计值。统计的是两次获取 Metric 时间间隔内的平均值。该指标自 v3.1.4 起支持。 |
+| resource_group_cpu_use_ratio              | 百分比 | 平均值 | **Deprecated** 该资源组使用的 Pipeline 线程时间片占所有资源组 Pipeline 线程时间片的比例。统计的是两次获取指标时间间隔内的平均值。 |
+| resource_group_connector_scan_use_ratio   | 百分比 | 平均值 | **Deprecated** 该资源组使用的外表 Scan 线程时间片占所有资源组 Pipeline 线程时间片的比例。统计的是两次获取指标时间间隔内的平均值。 |
+| resource_group_scan_use_ratio             | 百分比 | 平均值 | **Deprecated** 该资源组使用的内表 Scan 线程时间片占所有资源组 Pipeline 线程时间片的比例。统计的是两次获取指标时间间隔内的平均值。 |
 
 ### 查看资源组的使用信息
 
-从 v3.1.4 版本开始，StarRocks 支持 SQL 语句 SHOW USAGE RESOURCE GROUPS，用以展示每个资源组在各个 BE 上的使用信息。各个字段的含义如下：
+从 v3.1.4 版本开始，StarRocks 支持 SQL 语句 [SHOW USAGE RESOURCE GROUPS](../sql-reference/sql-statements/Administration/SHOW_RUNNING_QUERIES.md)，用以展示每个资源组在各个 BE 上的使用信息。各个字段的含义如下：
 
 - `Name`：资源组的名称。
 - `Id`：资源组的 ID。
