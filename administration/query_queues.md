@@ -67,7 +67,7 @@ SET GLOBAL enable_group_level_query_queue = true;
 
 ### 资源组粒度的资源阈值
 
-从 v3.1.4 开始，您可以在创建资源组时为其设置各自的并发查询上限 `concurrency_limit` 和 CPU 核数上限 `max_cpu_cores`。当发起一个查询时，如果任意一项资源占用超过了全局粒度或资源组粒度的的资源阈值，那么查询会进行排队，直到所有资源都没有超过阈值，再执行该查询。
+从 v3.1.4 开始，您可以在创建资源组时为其设置各自的并发查询上限 `concurrency_limit` 和 CPU 核数上限 `max_cpu_cores`。当发起一个查询时，如果任意一项资源占用超过了全局粒度或资源组粒度的资源阈值，那么查询会进行排队，直到所有资源都没有超过阈值，再执行该查询。
 
 | **属性**          | **默认值** | **描述**                                                     |
 | ----------------- | ---------- | ------------------------------------------------------------ |
@@ -78,9 +78,9 @@ SET GLOBAL enable_group_level_query_queue = true;
 
 ### 管理查询并发数量
 
-当正在运行的查询数量 `num_running_queries` 超过全局粒度或资源组粒度的 `concurrency_limit`  时，新到来的查询会进行排队。在 < v3.1.4  和 ≥ v3.1.4 版本中，获取 `num_running_queries` 的方式不同。
+当正在运行的查询数量 `num_running_queries` 超过全局粒度或资源组粒度的 `concurrency_limit`  时，新到来的查询会进行排队。在 &lt; v3.1.4  和 &ge; v3.1.4 版本中，获取 `num_running_queries` 的方式不同。
 
-- < v3.1.4 版本，`num_running_queries` 由 BE 周期性汇报得出正在运行查询数量，汇报周期为 `report_resource_usage_interval_ms`。所以，系统对于 `num_running_queries` 的变化感知会有一定的延迟。例如，如果当下 BE 汇报的 `num_running_queries` 没有超过全局粒度和资源组粒度的 `concurrency_limit`，但是短时间内到来超过了 `concurrency_limit` 的查询，那么这些查询也都会执行，而不会进行排队。
+- < v3.1.4 版本，`num_running_queries` 由 BE 周期性汇报得出正在运行的查询数量，汇报周期为 `report_resource_usage_interval_ms`。所以，系统对于 `num_running_queries` 的变化感知会有一定的延迟。例如，如果当下 BE 汇报的 `num_running_queries` 没有超过全局粒度和资源组粒度的 `concurrency_limit`，但是在下次汇报前如果发起了大量查询，超过了 `concurrency_limit` 的限制，那么这些新查询也都会执行，而不会进行排队。
 
 - ≥ v3.1.4 版本，所有 FE 正在运行的查询数量 `num_running_queries` 由 Leader FE 集中管理。每个 Follower FE 在发起和结束一个查询时，会通知 Leader FE，从而可以应对短时间内查询激增超过了 `concurrency_limit` 的场景。
 
@@ -106,8 +106,8 @@ SET GLOBAL enable_group_level_query_queue = true;
 
 | **变量**                      | **默认值** | **描述**                                                     |
 | ----------------------------- | ---------- | ------------------------------------------------------------ |
-| query_queue_driver_high_water | -1         | 查询并发 Driver 高位上限。非负数有效。等于 `0` 时，会设置为 `avg_be_cpu_cores*16`，其中 `avg_be_cpu_cores` 表示所有 BE 的 CPU 核数的平均值。大于 `0` 时，会直接使用该值。 |
-| query_queue_driver_low_water  | -1         | 查询并发 Driver 低位上限。非负数有效。等于 `0` 时，会设置为 `avg_be_cpu_cores*8`。大于 `0` 时，会直接使用该值。 |
+| query_queue_driver_high_water | -1         | 查询并发 Driver 高位上限。仅在设置为大于 `0` 后生效。等于 `0` 时，会设置为 `avg_be_cpu_cores*16`，其中 `avg_be_cpu_cores` 表示所有 BE 的 CPU 核数的平均值。大于 `0` 时，会直接使用该值。 |
+| query_queue_driver_low_water  | -1         | 查询并发 Driver 低位上限。仅在设置为大于 `0` 后生效。等于 `0` 时，会设置为 `avg_be_cpu_cores*8`。大于 `0` 时，会直接使用该值。 |
 
 ## 观测查询队列
 
@@ -160,10 +160,10 @@ MySQL [(none)]> SHOW PROCESSLIST;
 
 从 v3.1.4 版本开始，StarRocks 支持 SQL 语句 SHOW RUNNING QUERIES，用于展示每个查询的队列信息。各字段的含义如下：
 
-- `QuerId`：该查询的 Query ID。
+- `QueryId`：该查询的 Query ID。
 - `ResourceGroupId`：该查询命中的资源组 ID。当没有命中用户定义的资源组时，会显示为 “-”。
 - `StartTime`：该查询开始时间。
-- `PendingTimeout`：该查询未来排队超时的时间。
+- `PendingTimeout`：PENDING 状态下查询在队列中超时的时间。
 - `QueryTimeout`：该查询超时的时间。
 - `State`：该查询的排队状态。其中，PENDING 表示在队列中；RUNNING 表示正在执行。
 - `Slots`：该查询申请的逻辑资源数量，目前固定为 `1`。
